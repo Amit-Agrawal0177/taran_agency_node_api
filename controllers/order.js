@@ -1,4 +1,6 @@
 const orderQuery = require("../models/order.js");
+const productQuery = require("../models/product.js");
+const stockQuery = require("../models/stock.js");
 
 const crypto = require('crypto');
 const moment = require("moment-timezone");
@@ -18,9 +20,67 @@ exports.orderCruds = async (req, res) => {
 
     if(order_id)
     {
-      let updateData = await orderQuery.updateOrderDetails(order_id, { order_status, delivered_by });
+      if (!(order_id && order_status && item_json)) {
+        return res.status(200).json({
+          statusCode: 3,
+          msg: "Req params not found"
+        });
+      }
+
+      if(order_status == "payment done")  //check every thing in stocks
+      {
+        let product_stocks_status = []
+        let temp = item_json;
+
+        if (typeof item_json === 'string') {
+           temp = JSON.parse(item_json);
+        }
+
+        for(let key of temp)
+        {
+          let ps = await productQuery.fetchProductDetails({prod_id : key.prod_id})
+          if(ps.length)
+          {
+            if(key.qty > ps[0].stocks_left) 
+            {
+              product_stocks_status.push({prod_id : key.prod_id, prod_name : ps[0].prod_name, msg : `${ps[0].stocks_left} left, in stocks`})
+            }
+          }
+          else
+          {
+            product_stocks_status.push({prod_id : key.prod_id, prod_name : "Prod Not Found", msg : `Wrong product selection`})
+          }
+        }
+
+        if(product_stocks_status.length)
+        {
+          return res.status(200).json({
+            statusCode: 9,
+            msg: "Insufficent stocks",
+            product_stocks_status
+          });
+        }
+      }
+      
+      let updateData = await orderQuery.updateOrderDetails(order_id, { item_json : JSON.stringify(item_json), order_status, delivered_by });
       if(updateData.affectedRows)
       {
+        let oldData = await orderQuery.fetchOderDetails({order_id})
+        if(order_status == "payment done")  //check every thing in stocks
+        {
+          console.log(item_json);
+          let temp = item_json;
+
+          if (typeof item_json === 'string') {
+            temp = JSON.parse(item_json);
+          }
+
+          for(let key of temp)
+          {
+            await stockQuery.insertStock({prod_id : key.prod_id, qty : Number(key.qty) * -1, user_id : oldData[0].user_id});
+          }
+        }
+
         return res.status(200).json({
           statusCode: 0,
           msg: "Success"

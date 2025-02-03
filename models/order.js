@@ -42,6 +42,10 @@ exports.insertOrderDetails = async function (data) {
 
 exports.updateOrderDetails = async function (order_id,  data) {
   try {
+    data = Object.fromEntries(
+      Object.entries(data).filter(([key, value]) => value !== undefined && value !== null)
+    );
+    
     let sql = `update order_table set ? where order_id = ${order_id} `;
     const result = await query(sql, [data]);
     return result;

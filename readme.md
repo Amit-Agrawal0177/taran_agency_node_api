@@ -16,3 +16,8 @@ Api Description
 1. orderList opt customer wise, datewise, complete order, pending order, complete order
 2. addOrder
 3. updateOrder
+
+
+<!-- [{"prod_id":1, "qty":10, "amt": 20}, {"prod_id":2, "qty":10, "amt": 20}] -->
+<!-- 'order_status : on_cart,payment done,delivered' -->
+<!-- http://15.206.163.148:30119/api-docs/ -->

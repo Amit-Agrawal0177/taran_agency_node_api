@@ -116,4 +116,32 @@ router.route("/addUser").post(userControl.addUser);
  *               description: Server Error
  */
 router.route("/listOfUser").post(userControl.listOfUser);
+
+/**
+ * @swagger
+ * /user/updateUserDetails:
+ *      post:
+ *          security:
+ *             - CT_JWT: []
+ *          summary: 'updateUserDetails '
+ *          tags:
+ *           - User
+ *          description: ''
+ *          parameters:
+ *           - name: body
+ *             in: body
+ *             schema:
+ *              type: object
+ *              items:
+ *                  type: string
+ *              example:  {"user_id": "", "address": "", "name": "", "is_active": "" }
+ *          responses:
+ *              '200':
+ *               description: OK
+ *              '403':
+ *               description: Not proper permission
+ *              '500':
+ *               description: Server Error
+ */
+router.route("/updateUserDetails").post(userControl.updateUserDetails);
 module.exports = router;

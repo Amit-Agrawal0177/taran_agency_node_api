@@ -19,3 +19,16 @@ exports.insertStock = async function (data) {
     return "";
   }
 };
+
+exports.fetchProductStocks = async function (data) {
+  try {
+    let sql = `select sum(qty) as stocks_left, * from stock_table where 1=1 `
+    + (data.prod_id ? ` and prod_id = '${data.prod_id}' ` : " ");
+    const result = await query(sql);
+    return result;
+
+  } catch (error) {
+    logger.error('Error :', error); // Log error using Winston
+    return "";
+  }
+};

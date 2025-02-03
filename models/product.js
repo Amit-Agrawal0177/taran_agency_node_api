@@ -38,6 +38,10 @@ exports.insertProductDetails = async function (data) {
 
 exports.updateRoductDetails = async function (prod_id,  data) {
   try {
+    data = Object.fromEntries(
+      Object.entries(data).filter(([key, value]) => value !== undefined && value !== null)
+    );
+    
     let sql = `update product_master set ? where prod_id = ${prod_id} `;
     const result = await query(sql, [data]);
     return result;

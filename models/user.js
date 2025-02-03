@@ -40,6 +40,10 @@ exports.insertUserDetails = async function (data) {
 
 exports.updateUserDetails = async function (user_id,  data) {
   try {
+    data = Object.fromEntries(
+      Object.entries(data).filter(([key, value]) => value !== undefined && value !== null)
+    );
+
     let sql = `update user_table set ? where user_id = ${user_id} `;
     const result = await query(sql, [data]);
     return result;

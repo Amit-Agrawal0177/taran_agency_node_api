@@ -218,3 +218,35 @@ exports.listOfUser = async (req, res) => {
     });
   }
 };
+
+exports.updateUserDetails = async (req, res) => {
+  try {
+    var { user_id, address, name, is_active } = req.body;
+    
+    if (!(user_id)) {
+      return res.status(200).json({
+        statusCode: 3,
+        msg: "Req params not found"
+      });
+    }
+
+    let data = await userQuery.updateUserDetails(user_id, {address, name, is_active});
+    if (data.affectedRows) {
+      return res.status(200).json({
+        statusCode: 0,
+        msg: "Success"
+      });
+    }
+
+    return res.status(200).json({
+      statusCode: 1,
+      msg: "Failed to update"
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(200).json({
+      statusCode: 5,
+      msg: "Error found"
+    });
+  }
+};
