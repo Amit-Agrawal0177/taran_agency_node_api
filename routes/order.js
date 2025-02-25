@@ -14,7 +14,7 @@ const router = express.Router();
  *          summary: 'orderCruds cruds api'
  *          tags:
  *           - Order
- *          description: 'order_status : on_cart,payment done,delivered, item_json : [{"prod_id":1, "qty":10, "amt": 20}, {"prod_id":2, "qty":10, "amt": 20}]'
+ *          description: 'order_status : on_cart,payment done,delivered,cancelled, item_json : [{"prod_id":1, "qty":10, "amt": 20}, {"prod_id":2, "qty":10, "amt": 20}]'
  *          parameters:
  *           - name: body
  *             in: body

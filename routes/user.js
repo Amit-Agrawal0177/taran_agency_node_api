@@ -144,4 +144,32 @@ router.route("/listOfUser").post(userControl.listOfUser);
  *               description: Server Error
  */
 router.route("/updateUserDetails").post(userControl.updateUserDetails);
+
+/**
+ * @swagger
+ * /user/dashboardApi:
+ *      post:
+ *          security:
+ *             - CT_JWT: []
+ *          summary: 'dashboardApi '
+ *          tags:
+ *           - User
+ *          description: ''
+ *          parameters:
+ *           - name: body
+ *             in: body
+ *             schema:
+ *              type: object
+ *              items:
+ *                  type: string
+ *              example:  {}
+ *          responses:
+ *              '200':
+ *               description: OK
+ *              '403':
+ *               description: Not proper permission
+ *              '500':
+ *               description: Server Error
+ */
+router.route("/dashboardApi").post(userControl.dashboardApi);
 module.exports = router;

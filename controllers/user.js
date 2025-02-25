@@ -1,4 +1,7 @@
 const userQuery = require("../models/user.js");
+const orderQuery = require("../models/order.js");
+const productQuery = require("../models/product.js");
+const stockQuery = require("../models/stock.js");
 
 const crypto = require('crypto');
 const moment = require("moment-timezone");
@@ -235,6 +238,72 @@ exports.updateUserDetails = async (req, res) => {
       return res.status(200).json({
         statusCode: 0,
         msg: "Success"
+      });
+    }
+
+    return res.status(200).json({
+      statusCode: 1,
+      msg: "Failed to update"
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(200).json({
+      statusCode: 5,
+      msg: "Error found"
+    });
+  }
+};
+
+exports.dashboardApi = async (req, res) => {
+  try {
+    let dashboard = {}
+
+    let data = await userQuery.fetchUserCount({is_active : "Y", role_id : "customer"});
+    if (data.length) dashboard.customerCount = data[0].count 
+    else dashboard.customerCount = 0
+
+    data = await userQuery.fetchUserCount({is_active : "Y", role_id : "employees"});
+    if (data.length) dashboard.employeesCount = data[0].count 
+    else dashboard.employeesCount = 0
+
+    data = await orderQuery.fetchOderCount({order_status : "delivered", doa : "1"});
+    if (data.length) dashboard.deliveredOrderCount = data[0].count 
+    else dashboard.deliveredOrderCount = 0
+
+    data = await orderQuery.fetchOderCount({order_status : "payment done", doa : "1"});
+    if (data.length) dashboard.pendingOrderCount = data[0].count 
+    else dashboard.pendingOrderCount = 0
+
+    data = await orderQuery.fetchOderCount({order_status : "cancelled", doa : "1"});
+    if (data.length) dashboard.cancelledOrderCount = data[0].count 
+    else dashboard.cancelledOrderCount = 0
+
+    data = await orderQuery.fetchOderCount({total : "on_cart", doa : "1"});
+    if (data.length) dashboard.totalOrderCount = data[0].count 
+    else dashboard.totalOrderCount = 0
+
+    data = await orderQuery.fetchOderSum({order_status : "payment done", doa : "1"});
+    if (data.length) dashboard.todaySales = data[0].amt 
+    else dashboard.todaySales = 0
+
+    data = await orderQuery.fetchOderSum({order_status : "payment done"});
+    if (data.length) dashboard.totalSales = data[0].amt 
+    else dashboard.totalSales = 0
+
+    data = await orderQuery.fetchOderCount({order_status : "delivered"});
+    if (data.length) dashboard.totalDeliveredOrderCount = data[0].count 
+    else dashboard.totalDeliveredOrderCount = 0
+
+    data = await orderQuery.fetchOderDetails({order_status : "payment done"});
+    if (data.length) dashboard.paymentCompleteOrderList = data
+    else dashboard.paymentCompleteOrderList = []
+
+    if(Object.keys(dashboard).length)
+    {
+      return res.status(200).json({
+        statusCode: 0,
+        msg: "success",
+        op : [dashboard]
       });
     }
 

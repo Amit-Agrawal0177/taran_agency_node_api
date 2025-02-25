@@ -70,3 +70,36 @@ exports.fetchOderHistory = async function (data) {
     return "";
   }
 };
+
+exports.fetchOderSum = async function (data) {
+  try {
+    let sql = `select IFNULL(SUM(amount), 0) as amt from order_table where 1=1 `
+    + (data.user_id ? ` and user_id = '${data.user_id}' ` : " ") 
+    + (data.order_status ? ` and order_status = '${data.order_status}' ` : " ")
+    + (data.is_active ? ` and is_active = '${data.is_active}' ` : " ")
+    + (data.doa ? ` and date(doa) = CURDATE() ` : " ");
+    const result = await query(sql);
+    return result;
+
+  } catch (error) {
+    logger.error('Error :', error); // Log error using Winston
+    return "";
+  }
+};
+
+exports.fetchOderCount = async function (data) {
+  try {
+    let sql = `select IFNULL(count(order_id), 0) as count from order_table where 1=1 `
+    + (data.user_id ? ` and user_id = '${data.user_id}' ` : " ") 
+    + (data.order_status ? ` and order_status = '${data.order_status}' ` : " ")
+    + (data.is_active ? ` and is_active = '${data.is_active}' ` : " ")
+    + (data.total ? ` and order_status != '${data.total}' ` : " ")
+    + (data.doa ? ` and date(doa) = CURDATE() ` : " ");
+    const result = await query(sql);
+    return result;
+
+  } catch (error) {
+    logger.error('Error :', error); // Log error using Winston
+    return "";
+  }
+};

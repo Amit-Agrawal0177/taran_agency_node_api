@@ -96,3 +96,21 @@ exports.updateOtp = async function (data) {
     return "";
   }
 };
+
+exports.fetchUserCount = async function (data) {
+  try {
+    let sql = `select count(user_id) as count from user_table where 1=1 `
+    + (data.phone ? ` and phone = '${data.phone}' ` : " ") 
+    + (data.user_num ? ` and user_num = '${data.user_num}' ` : " ") 
+    + (data.name ? ` and name = '${data.name}' ` : " ") 
+    + (data.password ? ` and password = '${data.password}' ` : " ") 
+    + (data.is_active ? ` and is_active = '${data.is_active}' ` : " ") 
+    + (data.role_id ? ` and role_id = '${data.role_id}' ` : " ") ;
+    const result = await query(sql);
+    return result;
+
+  } catch (error) {
+    logger.error('Error :', error); // Log error using Winston
+    return "";
+  }
+};
