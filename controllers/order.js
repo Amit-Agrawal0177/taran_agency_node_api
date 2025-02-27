@@ -16,16 +16,25 @@ const logger = winston.loggers.get(MODULE);
 
 exports.orderCruds = async (req, res) => {
   try {
-    var { order_id, user_id, item_json, amount, order_status, delivered_by } = req.body;
+    var { order_id, user_id, item_json, amount, order_status="on_cart", delivered_by } = req.body;
 
     if(order_id)
     {
-      if (!(order_id && order_status && item_json)) {
+      if (!(order_id && order_status)) {
         return res.status(200).json({
           statusCode: 3,
           msg: "Req params not found"
         });
       }
+      let data = await orderQuery.fetchOderDetails({order_id});
+      if(!data.length)
+      {
+        return res.status(200).json({
+          statusCode: 3,
+          msg: "Order details not found"
+        });
+      }
+      item_json = JSON.parse(data[0].item_json)
 
       if(order_status == "payment done")  //check every thing in stocks
       {
@@ -68,7 +77,6 @@ exports.orderCruds = async (req, res) => {
         let oldData = await orderQuery.fetchOderDetails({order_id})
         if(order_status == "payment done")  //check every thing in stocks
         {
-          console.log(item_json);
           let temp = item_json;
 
           if (typeof item_json === 'string') {
@@ -91,13 +99,42 @@ exports.orderCruds = async (req, res) => {
         msg: "Failed"
       });
     }
-    if (!(user_id && item_json && item_json)) {
+    if (!(user_id && item_json)) {
       return res.status(200).json({
         statusCode: 3,
         msg: "Req params not found"
       });
     }
-    let updateData = await orderQuery.insertOrderDetails({ user_id, item_json : JSON.stringify(item_json), amount, order_status, delivered_by });
+    let data = await orderQuery.fetchOderDetails({user_id, order_status : "on_cart"});
+    if(data.length)
+    {
+      let temp = JSON.parse(data[0].item_json)
+      temp.push(item_json[0])
+
+      let amt = 0;
+      for(let key of temp)  amt = parseFloat(key.amt) + parseFloat(amt)
+
+      let updateData = await orderQuery.updateOrderDetails(data[0].order_id, { item_json : JSON.stringify(temp), amount : parseFloat(amt).toFixed(2) });
+      if(updateData.affectedRows)
+      {
+        return res.status(200).json({
+          statusCode: 0,
+          msg: "Success"
+        });
+      }
+      else
+      {
+        return res.status(200).json({
+          statusCode: 1,
+          msg: "Failed"
+        });
+      }
+    }
+
+    let amt = 0;
+    for(let key of item_json)  amt = parseFloat(key.amt) + parseFloat(amt)
+
+    let updateData = await orderQuery.insertOrderDetails({ user_id, item_json : JSON.stringify(item_json), amount : parseFloat(amt).toFixed(2), order_status, delivered_by });
     if(updateData)
     {
       return res.status(200).json({

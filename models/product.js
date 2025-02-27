@@ -10,11 +10,11 @@ var query = require("../config/mysqlConnection.js");
 
 exports.fetchProductDetails = async function (data) {
   try {
-    let sql = `select sum(qty) as stocks_left, pm.* from product_master as pm left join stock_table as st on st.prod_id = pm.prod_id where 1=1 `
+    let sql = `select COALESCE(SUM(st.qty), 0) as stocks_left, pm.* from product_master as pm left join stock_table as st on st.prod_id = pm.prod_id where 1=1 `
     + (data.prod_name ? ` and pm.prod_name like '%${data.prod_name}%' ` : " ") 
     + (data.prod_id ? ` and pm.prod_id = '${data.prod_id}' ` : " ") 
     + (data.is_active ? ` and pm.is_active = '${data.is_active}' ` : " ")
-    + ` order by pm.doa desc`;
+    + ` GROUP BY pm.prod_id order by pm.prod_name asc`;
     const result = await query(sql);
     return result;
 

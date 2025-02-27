@@ -10,8 +10,9 @@ var query = require("../config/mysqlConnection.js");
 
 exports.fetchOderDetails = async function (data) {
   try {
-    let sql = `select * from order_table where 1=1 `
+    let sql = `select * from order_table where is_active = "Y" `
     + (data.user_id ? ` and user_id = '${data.user_id}' ` : " ") 
+    + (data.order_id ? ` and order_id = '${data.order_id}' ` : " ") 
     + (data.order_status ? ` and order_status = '${data.order_status}' ` : " ")
     + ` order by order_id desc`;
     const result = await query(sql);

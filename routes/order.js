@@ -22,7 +22,7 @@ const router = express.Router();
  *              type: object
  *              items:
  *                  type: string
- *              example:  { "order_id":"only for update status of product", user_id, item_json, amount, order_status, delivered_by}
+ *              example:  { "order_id":"only for update status of product", user_id, item_json, order_status, delivered_by}
  *          responses:
  *              '200':
  *               description: OK
@@ -42,7 +42,7 @@ router.route("/orderCruds").post(orderControl.orderCruds);
  *          summary: 'list of order'
  *          tags:
  *           - Order
- *          description: ''
+ *          description: 'order_status : on_cart,payment done,delivered,cancelled'
  *          parameters:
  *           - name: body
  *             in: body
@@ -50,7 +50,7 @@ router.route("/orderCruds").post(orderControl.orderCruds);
  *              type: object
  *              items:
  *                  type: string
- *              example:  {order_id, order_status}
+ *              example:  {order_id, user_id, order_status}
  *          responses:
  *              '200':
  *               description: OK
