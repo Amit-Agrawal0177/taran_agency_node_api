@@ -52,3 +52,15 @@ exports.updateRoductDetails = async function (prod_id,  data) {
     return "";
   }
 };
+
+exports.fetchAllProductType = async function () {
+  try {
+    let sql = `select prod_type, count(prod_type) as product_count from product_master where is_active = "Y" group by prod_type order by prod_type asc; `;
+    const result = await query(sql);
+    return result;
+
+  } catch (error) {
+    logger.error('Error :', error); // Log error using Winston
+    return "";
+  }
+};

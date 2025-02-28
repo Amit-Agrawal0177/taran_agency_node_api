@@ -83,3 +83,29 @@ exports.listOfProduct = async (req, res) => {
     });
   }
 };
+
+exports.fetchAllProductType = async (req, res) => {
+  try {
+    var {} = req.body;
+
+    let data = await productQuery.fetchAllProductType();
+    if (data.length) {
+      return res.status(200).json({
+        statusCode: 0,
+        op: data,
+        msg: "Success"
+      });
+    }
+
+    return res.status(200).json({
+      statusCode: 1,
+      msg: "List Not Found"
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(200).json({
+      statusCode: 5,
+      msg: "Error found"
+    });
+  }
+};

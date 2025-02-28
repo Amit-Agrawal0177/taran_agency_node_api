@@ -61,4 +61,32 @@ router.route("/productCruds").post(productControl.productCruds);
  */
 router.route("/listOfProduct").post(productControl.listOfProduct);
 
+/**
+ * @swagger
+ * /product/fetchAllProductType:
+ *      post:
+ *          security:
+ *             - CT_JWT: []
+ *          summary: 'fetch all types of product category'
+ *          tags:
+ *           - Product
+ *          description: ''
+ *          parameters:
+ *           - name: body
+ *             in: body
+ *             schema:
+ *              type: object
+ *              items:
+ *                  type: string
+ *              example:  {}
+ *          responses:
+ *              '200':
+ *               description: OK
+ *              '403':
+ *               description: Not proper permission
+ *              '500':
+ *               description: Server Error
+ */
+router.route("/fetchAllProductType").post(productControl.fetchAllProductType);
+
 module.exports = router;
