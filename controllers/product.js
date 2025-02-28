@@ -60,9 +60,9 @@ exports.productCruds = async (req, res) => {
 
 exports.listOfProduct = async (req, res) => {
   try {
-    var { prod_id, prod_name } = req.body;
+    var { prod_id, prod_name, prod_type } = req.body;
 
-    let data = await productQuery.fetchProductDetails({prod_id, prod_name, is_active : "Y"});
+    let data = await productQuery.fetchProductDetails({prod_id, prod_name, prod_type, is_active : "Y"});
     if (data.length) {
       return res.status(200).json({
         statusCode: 0,

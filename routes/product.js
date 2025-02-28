@@ -50,7 +50,7 @@ router.route("/productCruds").post(productControl.productCruds);
  *              type: object
  *              items:
  *                  type: string
- *              example:  {prod_id, prod_name}
+ *              example:  {prod_id, prod_type, prod_name}
  *          responses:
  *              '200':
  *               description: OK

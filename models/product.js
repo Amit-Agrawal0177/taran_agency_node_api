@@ -14,6 +14,7 @@ exports.fetchProductDetails = async function (data) {
     + (data.prod_name ? ` and pm.prod_name like '%${data.prod_name}%' ` : " ") 
     + (data.prod_id ? ` and pm.prod_id = '${data.prod_id}' ` : " ") 
     + (data.is_active ? ` and pm.is_active = '${data.is_active}' ` : " ")
+    + (data.prod_type ? ` and pm.prod_type = '${data.prod_type}' ` : " ")
     + ` GROUP BY pm.prod_id order by pm.prod_name asc`;
     const result = await query(sql);
     return result;
