@@ -14,11 +14,11 @@ const logger = winston.loggers.get(MODULE);
 
 exports.productCruds = async (req, res) => {
   try {
-    var { prod_id, prod_name, description, image, stock_thershold, price, batch, mfg, cgst, sgst, is_active } = req.body;
+    var { prod_id, prod_name, prod_type, description, image, stock_thershold, price, batch, mfg, cgst, sgst, is_active } = req.body;
 
     if(prod_id)
     {
-      let updateData = await productQuery.updateRoductDetails(prod_id, { prod_name, description, image, price, stock_thershold, batch, mfg, cgst, sgst, is_active });
+      let updateData = await productQuery.updateRoductDetails(prod_id, { prod_name, prod_type, description, image, price, stock_thershold, batch, mfg, cgst, sgst, is_active });
       if(updateData.affectedRows)
       {
         return res.status(200).json({
@@ -37,7 +37,7 @@ exports.productCruds = async (req, res) => {
         msg: "Req params not found"
       });
     }
-    let updateData = await productQuery.insertProductDetails({ prod_name, description, image, price, stock_thershold, batch, mfg, cgst, sgst });
+    let updateData = await productQuery.insertProductDetails({ prod_name, prod_type, description, image, price, stock_thershold, batch, mfg, cgst, sgst });
     if(updateData.insertId)
     {
       return res.status(200).json({

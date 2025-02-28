@@ -22,7 +22,7 @@ const router = express.Router();
  *              type: object
  *              items:
  *                  type: string
- *              example:  { "prod_id":"only for edit and delete", prod_name, description, image, stock_thershold, price, batch, mfg, cgst, sgst, is_active : "Y" }
+ *              example:  { "prod_id":"only for edit and delete", prod_name,  prod_type, description, image, stock_thershold, price, batch, mfg, cgst, sgst, is_active : "Y" }
  *          responses:
  *              '200':
  *               description: OK
