@@ -71,6 +71,7 @@ exports.orderCruds = async (req, res) => {
         }
       }
       
+      item_json = mergeItemJson(item_json)
       let updateData = await orderQuery.updateOrderDetails(order_id, { item_json : JSON.stringify(item_json), order_status, delivered_by });
       if(updateData.affectedRows)
       {
@@ -113,7 +114,7 @@ exports.orderCruds = async (req, res) => {
 
       let amt = 0;
       for(let key of temp)  amt = parseFloat(key.amt) + parseFloat(amt)
-
+      temp = mergeItemJson(temp)
       let updateData = await orderQuery.updateOrderDetails(data[0].order_id, { item_json : JSON.stringify(temp), amount : parseFloat(amt).toFixed(2) });
       if(updateData.affectedRows)
       {
@@ -133,7 +134,7 @@ exports.orderCruds = async (req, res) => {
 
     let amt = 0;
     for(let key of item_json)  amt = parseFloat(key.amt) + parseFloat(amt)
-
+    item_json = mergeItemJson(item_json)
     let updateData = await orderQuery.insertOrderDetails({ user_id, item_json : JSON.stringify(item_json), amount : parseFloat(amt).toFixed(2), order_status, delivered_by });
     if(updateData)
     {
@@ -206,3 +207,21 @@ exports.orderHistory = async (req, res) => {
     });
   }
 };
+
+function mergeItemJson(data){
+  const mergedData = Object.values(
+    data.reduce((acc, item) => {
+        const { prod_id, amt, qty } = item;
+
+        if (!acc[prod_id]) {
+            acc[prod_id] = { prod_id, amt: 0, qty: 0 };
+        }
+
+        acc[prod_id].amt += amt;
+        acc[prod_id].qty += qty;
+
+        return acc;
+    }, {})
+  );
+  return mergedData
+}
