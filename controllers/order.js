@@ -140,6 +140,7 @@ exports.orderCruds = async (req, res) => {
     {
       return res.status(200).json({
         statusCode: 0,
+        op : item_json,
         msg: "Success"
       });
     }
