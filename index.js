@@ -10,6 +10,45 @@ require("./helpers/vault").getenv().then(() => {
     app.use(express.urlencoded({ limit: '50mb', extended: true }));
     app.use(express.static('public'));
 
+    const msQuery = require("./models/common.js");
+
+    const ipBlockMiddleware = async (req, res, next) => {
+      const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      const ip_result = await msQuery.fetchIpAddress(clientIp);
+      const ipData = ip_result[0];
+
+      if (ipData && ipData.blocked) {
+        return res.status(403).json({
+          error: 'Your IP has been blocked due to suspicious activity'
+        });
+      }
+
+      if (!ipData) {
+        await msQuery.insertIpAddress({ip_address : clientIp, request_count: 0, blocked: false});
+      }
+
+      const requestCount = ipData ? ipData.request_count : 0;
+      const firstRequestTimestamp = ipData ? ipData.first_request_timestamp : Date.now();
+
+      const currentTime = Date.now();
+      const oneMinute = 60 * 1000;
+
+      if (currentTime - firstRequestTimestamp > oneMinute) {
+        await msQuery.updateIpAddress(clientIp, { request_count: 1, first_request_timestamp: currentTime });
+      } else {
+        await msQuery.updateIpAddress(clientIp, { request_count: requestCount + 1 });
+      }
+
+      if (requestCount > 180) {
+        await msQuery.updateIpAddress(clientIp, { blocked: 1 });
+        return res.status(403).json({ statusCode: 403, msg: 'IP blocked due to excessive requests' });
+      }
+
+      await msQuery.insertApiLog(req);
+      next();
+    };
+
+    app.use(ipBlockMiddleware);
 
     //cors req for angular
     app.use(cors());
