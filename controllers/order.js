@@ -121,6 +121,7 @@ exports.orderCruds = async (req, res) => {
         return res.status(200).json({
           statusCode: 0,
           op : temp,
+          total_amt: parseFloat(amt).toFixed(2),
           msg: "Success"
         });
       }
@@ -141,6 +142,7 @@ exports.orderCruds = async (req, res) => {
       return res.status(200).json({
         statusCode: 0,
         op : item_json,
+        total_amt: parseFloat(amt).toFixed(2),
         msg: "Success"
       });
     }
