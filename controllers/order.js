@@ -71,7 +71,6 @@ exports.orderCruds = async (req, res) => {
         }
       }
       
-      item_json = mergeItemJson(item_json)
       let updateData = await orderQuery.updateOrderDetails(order_id, { item_json : JSON.stringify(item_json), order_status, delivered_by });
       if(updateData.affectedRows)
       {
@@ -110,11 +109,12 @@ exports.orderCruds = async (req, res) => {
     if(data.length)
     {
       let temp = JSON.parse(data[0].item_json)
-      temp.push(item_json[0])
+      // temp.push(item_json[0])
 
       let amt = 0;
       for(let key of temp)  amt = parseFloat(key.amt) + parseFloat(amt)
-      temp = mergeItemJson(temp)
+      temp = updateArray(temp, item_json[0])
+
       let updateData = await orderQuery.updateOrderDetails(data[0].order_id, { item_json : JSON.stringify(temp), amount : parseFloat(amt).toFixed(2) });
       if(updateData.affectedRows)
       {
@@ -135,7 +135,6 @@ exports.orderCruds = async (req, res) => {
 
     let amt = 0;
     for(let key of item_json)  amt = parseFloat(key.amt) + parseFloat(amt)
-    item_json = mergeItemJson(item_json)
     let updateData = await orderQuery.insertOrderDetails({ user_id, item_json : JSON.stringify(item_json), amount : parseFloat(amt).toFixed(2), order_status, delivered_by });
     if(updateData)
     {
@@ -209,20 +208,16 @@ exports.orderHistory = async (req, res) => {
   }
 };
 
-function mergeItemJson(data){
-  const mergedData = Object.values(
-    data.reduce((acc, item) => {
-        const { prod_id, amt, qty } = item;
+function updateArray(prev_arr, new_arr) {
+  const prevMap = new Map(prev_arr.map(item => [item.prod_id, item]));
 
-        if (!acc[prod_id]) {
-            acc[prod_id] = { prod_id, amt: 0, qty: 0 };
-        }
+  new_arr.forEach(newItem => {
+      if (newItem.qty === 0) {
+          prevMap.delete(newItem.prod_id);
+      } else {
+          prevMap.set(newItem.prod_id, newItem);
+      }
+  });
 
-        acc[prod_id].amt += amt;
-        acc[prod_id].qty += qty;
-
-        return acc;
-    }, {})
-  );
-  return mergedData
+  return Array.from(prevMap.values());
 }
