@@ -4,14 +4,13 @@ const handlebars = require("handlebars");
 
 module.exports = {
     sendSMS: async (smsText, mobileNo, template_id) => {
-
         const auth = {
             // project_code: process.env.PDBM_PROJECT_CODE,
             // password: process.env.PDBM_PASSWORD,
             project_code: 'VM',
             password: 'vm@9930i',
         };
-
+    
         const url = "https://trails.9930i.com/Api/authentication/authenticate";
         // $this->response($url);
         let result;
@@ -37,23 +36,24 @@ module.exports = {
             });;
             global.SMS_REFRESH_TOKEN = result.refreshToken;
         }
-
+    
         const smsData = {
             to: mobileNo,
             message: smsText,
+            sender: "FLOVTN",
             template_id: template_id,
         };
-
+    
         const header = {
             Authorization: result.accessToken,
         };
         console.log("Auth token : ", header);
         let smsUrl = "https://trails.9930i.com/Api/SMS/sendSMS";
-
+    
         let smsResult = await Axios.post(smsUrl, smsData, {
             headers: header,
         }).then((resp) => resp.data);
-        // console.log("Sms Response : ", smsResult);
+        console.log("Sms Response : ", smsResult);
         return smsResult;
     },
     sendMail: async (source, subject, text, fromName, toEmail, attachements = []) => {

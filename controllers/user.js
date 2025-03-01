@@ -2,6 +2,7 @@ const userQuery = require("../models/user.js");
 const orderQuery = require("../models/order.js");
 const productQuery = require("../models/product.js");
 const stockQuery = require("../models/stock.js");
+const {sendSMS} = require("../helpers/sms/index.js");
 
 const crypto = require('crypto');
 const moment = require("moment-timezone");
@@ -89,12 +90,20 @@ exports.login = async (req, res) => {
         }
       }
 
+      let newOtp = 0
       let prev_otp = await userQuery.fetchOtp({phone, user_id: data[0].user_id, is_active : "Y"})
       if(prev_otp.length == 0)
       {
-        let newOtp = parseInt(Math.random() * (10000 - 1000) + 1000);
-        let newE = await userQuery.insertNewOtp({phone, user_id: data[0].user_id, otp : newOtp})
+        newOtp = parseInt(Math.random() * (10000 - 1000) + 1000);
+        await userQuery.insertNewOtp({phone, user_id: data[0].user_id, otp : newOtp})
       }
+      else{
+        newOtp = prev_otp[0].otp
+      }
+
+      let app_name = "Flovation"
+      let message = `Thank you for using ${app_name} app, please use OTP - ${newOtp} to sign-in. Powered by Flovation Tech.`;
+      let send = await sendSMS(message, phone, "1107173834952031577");
 
       // if(newE.insertId)
       {
@@ -118,6 +127,10 @@ exports.login = async (req, res) => {
         let newE = await userQuery.insertNewOtp({phone, user_id: newdata.insertId, otp : newOtp})
         if(newE.insertId)
         {
+          let app_name = "Flovation"
+          let message = `Thank you for using ${app_name} app, please use OTP - ${newOtp} to sign-in. Powered by Flovation Tech.`;
+          let send = await sendSMS(message, phone, "1107173834952031577");
+
           return res.status(200).json({
             statusCode: 1,
             msg: "Please Registered, otp is sent to your contact number."
@@ -172,6 +185,11 @@ exports.addUser = async (req, res) => {
         let newE = await userQuery.insertNewOtp({phone, user_id: newdata.insertId, otp : newOtp})
         if(newE.insertId)
         {
+
+          let app_name = "Flovation"
+          let message = `Thank you for using ${app_name} app, please use OTP - ${newOtp} to sign-in. Powered by Flovation Tech.`;
+          let send = await sendSMS(message, phone, "1107173834952031577");
+
           return res.status(200).json({
             statusCode: 0,
             msg: "User Registered, otp is sent to the respective contact number."

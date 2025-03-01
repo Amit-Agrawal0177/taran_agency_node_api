@@ -158,9 +158,9 @@ exports.orderCruds = async (req, res) => {
 
 exports.listOfOrder = async (req, res) => {
   try {
-    var { order_id, order_status } = req.body;
+    var { order_id, order_status, user_id } = req.body;
 
-    let data = await orderQuery.fetchOderDetails({order_id, order_status});
+    let data = await orderQuery.fetchOderDetails({order_id, order_status, user_id});
     if (data.length) {
       return res.status(200).json({
         statusCode: 0,
