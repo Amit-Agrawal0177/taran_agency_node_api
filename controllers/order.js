@@ -209,6 +209,11 @@ exports.orderHistory = async (req, res) => {
 };
 
 function updateArray(prev_arr, new_arr) {
+  // Ensure new_arr is always an array
+  if (!Array.isArray(new_arr)) {
+      new_arr = [new_arr];  // Convert single object to array
+  }
+
   const prevMap = new Map(prev_arr.map(item => [item.prod_id, item]));
 
   new_arr.forEach(newItem => {
