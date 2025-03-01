@@ -112,8 +112,8 @@ exports.orderCruds = async (req, res) => {
       // temp.push(item_json[0])
 
       let amt = 0;
-      for(let key of temp)  amt = parseFloat(key.amt) + parseFloat(amt)
       temp = updateArray(temp, item_json[0])
+      for(let key of temp)  amt = parseFloat(key.amt) + parseFloat(amt)
 
       let updateData = await orderQuery.updateOrderDetails(data[0].order_id, { item_json : JSON.stringify(temp), amount : parseFloat(amt).toFixed(2) });
       if(updateData.affectedRows)
