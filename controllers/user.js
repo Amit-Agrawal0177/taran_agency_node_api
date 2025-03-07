@@ -63,6 +63,7 @@ exports.login = async (req, res) => {
             user_id : data[0].user_id,
             phone: data[0].phone,
             name : data[0].name,
+            address : data[0].address,
             role_id: data[0].role_id
           }]
         });
@@ -83,6 +84,7 @@ exports.login = async (req, res) => {
                 user_id : data[0].user_id,
                 phone: data[0].phone,
                 name : data[0].name,
+                address : data[0].address,
                 role_id: data[0].role_id
               }]
             });
