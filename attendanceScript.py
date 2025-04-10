@@ -2,7 +2,7 @@ import time
 import requests
 from datetime import datetime
 import schedule
-print("hell0")
+
 def is_restricted_day():
     today = datetime.now()
     weekday = today.weekday()

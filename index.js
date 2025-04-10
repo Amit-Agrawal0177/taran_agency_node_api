@@ -86,7 +86,7 @@ require("./helpers/vault").getenv().then(() => {
       const { spawn } = require('child_process');
     
       // const attendanceProcess = spawn('/opt/anaconda3/bin/python', ['-u', 'attendanceScript.py']);
-      const attendanceProcess = spawn('/usr/bin/python3', ['attendanceScript.py']);
+      const attendanceProcess = spawn('/usr/bin/python3', ['-u', 'attendanceScript.py']);
     
       attendanceProcess.stdout.on('data', (data) => {
         console.log(`stdout: ${data}`);
