@@ -81,4 +81,26 @@ require("./helpers/vault").getenv().then(() => {
     app.listen(port, () => {
         console.log("Server is running on port ", `http://localhost:${port}/api-docs`);
     });
+
+    function attendanceScript () {
+      const { spawn } = require('child_process');
+    
+      // const attendanceProcess = spawn('/opt/anaconda3/bin/python', ['-u', 'attendanceScript.py']);
+      const attendanceProcess = spawn('python', ['attendanceScript.py']);
+    
+      attendanceProcess.stdout.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+      });
+    
+      attendanceProcess.stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+      });
+    
+      attendanceProcess.on('close', (code) => {
+        console.log(`child process exited with code ${code}`);
+        attendanceScript();
+      });
+    }
+
+    attendanceScript ()
 });
