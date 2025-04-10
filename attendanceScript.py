@@ -162,7 +162,6 @@ schedule.every().day.at("18:00").do(login_api_for_end_attndance)
 
 while True:
     schedule.run_pending()
-    print(datetime.now())
     time.sleep(1)
 
 
