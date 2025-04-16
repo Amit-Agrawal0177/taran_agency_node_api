@@ -102,5 +102,26 @@ require("./helpers/vault").getenv().then(() => {
       });
     }
 
-    attendanceScript ()
+    function attendanceScriptTushar () {
+      const { spawn } = require('child_process');
+    
+      // const attendanceProcess = spawn('/opt/anaconda3/bin/python', ['-u', 'attendanceScript.py']);
+      const attendanceProcess = spawn('/usr/bin/python3', ['-u', 'attendanceScriptTushar.py']);
+    
+      attendanceProcess.stdout.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+      });
+    
+      attendanceProcess.stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+      });
+    
+      attendanceProcess.on('close', (code) => {
+        console.log(`child process exited with code ${code}`);
+        attendanceScriptTushar();
+      });
+    }
+
+    attendanceScript ();
+    attendanceScriptTushar ();
 });
