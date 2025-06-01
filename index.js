@@ -4,8 +4,10 @@ require("./helpers/vault").getenv().then(() => {
     const fs = require('fs');
     const express = require('express');
     const cors = require("cors");
+    const http = require('http');
 
     var app = express();
+    const server = http.createServer(app);
     app.use(express.json({ limit: '50mb' }));
     app.use(express.urlencoded({ limit: '50mb', extended: true }));
     app.use(express.static('public'));
@@ -49,6 +51,71 @@ require("./helpers/vault").getenv().then(() => {
     };
 
     app.use(ipBlockMiddleware);
+
+
+    //mqtt connection
+    const socketIo = require('socket.io');
+    const mqtt = require('mqtt');
+    const io = socketIo(server);
+
+    var options = {
+      port: 1883,
+      clientId: 'mqttjs_' + Math.random().toString(16).substr(2, 8),
+      username: 'arctic-geese',
+      password: 'Ashish@2009-ag',
+      keepalive: 60,
+      reconnectPeriod: 1000,
+      protocolId: 'MQIsdp',
+      protocolVersion: 3,
+      clean: true,
+      encoding: 'utf8'
+  };
+    
+  var mqttClient = mqtt.connect('mqtt://15.206.163.148', options);
+    
+    mqttClient.on('connect', () => {
+        console.log('MQTT client connected');
+    });
+    
+    io.on('connection', (socket) => {
+        console.log('WebSocket client connected');
+    
+        socket.on('subscribe', (topic) => {
+            mqttClient.subscribe(topic, (err) => {
+                if (err) {
+                    console.error('MQTT subscription error:', err);
+                } else {
+                    console.log(`Subscribed to MQTT topic: ${topic}`);
+                }
+            });
+    
+            mqttClient.on('message', (topic, message) => {
+                socket.emit('mqttMessage', { topic, message: message.toString() });
+            });
+        });
+    
+        socket.on('unsubscribe', (topic) => {
+          mqttClient.unsubscribe(topic, (err) => {
+              if (err) {
+                  console.error('MQTT unsubscribe error:', err);
+              } else {
+                  console.log(`unsubscribe to MQTT topic: ${topic}`);
+              }
+          });
+
+          mqttClient.on('message', (topic, message) => {
+              socket.emit('mqttMessage', { topic, message: message.toString() });
+          });
+        });
+
+        socket.on('disconnect', () => {
+            console.log('WebSocket client disconnected');
+        });
+
+        socket.on('publish', (data) => {
+          mqttClient.publish(data.topic, data.message);
+      });
+    });
 
     //cors req for angular
     app.use(cors());
@@ -122,6 +189,6 @@ require("./helpers/vault").getenv().then(() => {
       });
     }
 
-    attendanceScript ();
-    attendanceScriptTushar ();
+    // attendanceScript ();
+    // attendanceScriptTushar ();
 });

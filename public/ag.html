@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Arctic-Geese Video Stream</title>
+  <script src="http://15.206.163.148:30119/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0a0a0a;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      color: #ff4b4b;
+      letter-spacing: 1px;
+      text-shadow: 0 0 10px rgba(255, 75, 75, 0.6);
+    }
+
+    #videoFrame {
+      max-width: 90%;
+      max-height: 80vh;
+      border-radius: 16px;
+      border: 2px solid #ff4b4b;
+      box-shadow: 0 0 20px rgba(255, 75, 75, 0.3);
+      background: #1a1a1a;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      #videoFrame {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🚨 Arctic-Geese</h1>
+  <img id="videoFrame" alt="Waiting for video stream..." />
+
+  <script>
+    const socket = io(); // Make sure your backend is up and CORS is configured
+
+    const videoElement = document.getElementById('videoFrame');
+
+    socket.on('connect', () => {
+      console.log("📡 Socket connected, subscribing...");
+      socket.emit('subscribe', 'Agrawal_video');
+    });
+
+    socket.on('mqttMessage', function (data) {
+      try {
+        const parsed = JSON.parse(data.message);
+        if (parsed.data) {
+          videoElement.src = 'data:image/jpeg;base64,' + parsed.data;
+        }
+      } catch (e) {
+        if (typeof data.message === 'string' && data.message.length > 100) {
+          videoElement.src = 'data:image/jpeg;base64,' + data.message;
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
