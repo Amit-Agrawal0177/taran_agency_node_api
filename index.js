@@ -118,7 +118,11 @@ require("./helpers/vault").getenv().then(() => {
     });
 
     //cors req for angular
-    app.use(cors());
+    // app.use(cors());
+    
+    app.use(cors({
+      origin: "*"  
+    }));
 
     //morgan
     const morgan = require("./loader/morgan/index.js");
