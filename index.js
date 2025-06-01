@@ -56,7 +56,14 @@ require("./helpers/vault").getenv().then(() => {
     //mqtt connection
     const socketIo = require('socket.io');
     const mqtt = require('mqtt');
-    const io = socketIo(server);
+    const io = socketIo(server, {
+      cors: {
+        origin: "*",      // Allow all origins or specify your front-end URL here
+        methods: ["GET", "POST"],
+        allowedHeaders: ["my-custom-header"], // optional, if you use custom headers
+        credentials: true
+      }
+    });
 
     var options = {
       port: 1883,
