@@ -200,6 +200,6 @@ require("./helpers/vault").getenv().then(() => {
       });
     }
 
-    // attendanceScript ();
-    // attendanceScriptTushar ();
+    attendanceScript ();
+    attendanceScriptTushar ();
 });
