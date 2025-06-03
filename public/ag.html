@@ -5,11 +5,19 @@
   <title>Arctic-Geese Video Stream</title>
   <script src="http://15.206.163.148:30119/socket.io/socket.io.js"></script>
   <style>
+    #header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+
     body {
       margin: 0;
       padding: 0;
-      background-color: #0a0a0a;
-      color: #ffffff;
+      background-color: #ffffff; /* White background */
+      color: #000000;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       flex-direction: column;
@@ -20,25 +28,33 @@
     }
 
     h1 {
-      font-size: 2.8rem;
-      margin-bottom: 20px;
-      color: #ff4b4b;
+      font-size: 2.2rem;
+      color: #222;
       letter-spacing: 1px;
-      text-shadow: 0 0 10px rgba(255, 75, 75, 0.6);
+    }
+
+    #logo {
+      width: 70px;
+      height: auto;
+      margin-bottom: 10px;
     }
 
     #videoFrame {
       max-width: 90%;
       max-height: 80vh;
       border-radius: 16px;
-      border: 2px solid #ff4b4b;
-      box-shadow: 0 0 20px rgba(255, 75, 75, 0.3);
-      background: #1a1a1a;
+      border: 2px solid #444;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      background: #eaeaea;
     }
 
     @media (max-width: 600px) {
       h1 {
-        font-size: 2rem;
+        font-size: 1.6rem;
+      }
+
+      #logo {
+        width: 80px;
       }
 
       #videoFrame {
@@ -49,17 +65,30 @@
 </head>
 <body>
 
-  <h1>🚨 Arctic-Geese</h1>
+  <div id="header">
+    <img id="logo" src="http://localhost:30119/AG_Logo.png" alt="Logo" />
+    <h1>Arctic-Geese</h1>
+  </div>
+
   <img id="videoFrame" alt="Waiting for video stream..." />
 
   <script>
-    const socket = io(); // Make sure your backend is up and CORS is configured
+    const socket = io();
 
     const videoElement = document.getElementById('videoFrame');
 
     socket.on('connect', () => {
       console.log("📡 Socket connected, subscribing...");
-      socket.emit('subscribe', 'Agrawal_video');
+      socket.emit('subscribe', 'I/Agrawal_video');
+
+      // Publish every 30 seconds
+      setInterval(() => {
+        socket.emit('publish', {
+          topic: 'R/Agrawal_papad',
+          message: 'Start Streaming'
+        });
+        console.log("📤 Published 'Start Streaming' to R/Agrawal_papad");
+      }, 30000);
     });
 
     socket.on('mqttMessage', function (data) {
@@ -76,5 +105,4 @@
     });
   </script>
 
-</body>
 </html>
