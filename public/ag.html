@@ -80,6 +80,10 @@
     socket.on('connect', () => {
       console.log("📡 Socket connected, subscribing...");
       socket.emit('subscribe', 'I/Agrawal_video');
+      socket.emit('publish', {
+        topic: 'R/Agrawal_papad',
+        message: 'Start Streaming'
+      });
 
       // Publish every 30 seconds
       setInterval(() => {
