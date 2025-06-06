@@ -2,6 +2,7 @@ import time
 import requests
 from datetime import datetime
 import schedule
+import random
 
 def is_restricted_day():
     today = datetime.now()
@@ -28,6 +29,9 @@ def login_api_for_start_attndance():
     url = "https://api.hr.9930i.com/login/email_login"
     payload = {"email": "meghams147@gmail.com", "password": "12345678"}
     headers = {"Content-Type": "application/json"}
+
+    number = random.randint(300, 1800)
+    time.sleep(number)
 
     try:
         response = requests.post(url, json=payload, headers=headers)
@@ -70,6 +74,9 @@ def login_api_for_end_attndance():
     url = "https://api.hr.9930i.com/login/email_login"
     payload = {"email": "meghams147@gmail.com", "password": "12345678"}
     headers = {"Content-Type": "application/json"}
+
+    number = random.randint(300, 1800)
+    time.sleep(number)
 
     try:
         response = requests.post(url, json=payload, headers=headers)
