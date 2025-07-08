@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arctic-Geese Counting Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="http://15.206.163.148:30119/socket.io/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card:nth-child(2) {
+            background: linear-gradient(135deg, #48cae4, #0077b6);
+        }
+
+        .stat-card:nth-child(3) {
+            background: linear-gradient(135deg, #06ffa5, #00d4aa);
+        }
+
+        .stat-card:nth-child(4) {
+            background: linear-gradient(135deg, #a8edea, #e7014c);
+        }
+
+        .stat-card:nth-child(5) {
+            background: linear-gradient(135deg, #ff9a9e, #ca03f8);
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .camera-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .camera-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e1e8ed;
+        }
+
+        .camera-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            padding: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 10px;
+        }
+
+        .batch-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .batch-info {
+            flex: 1;
+        }
+
+        .batch-id {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .batch-time {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .batch-counts {
+            display: flex;
+            gap: 15px;
+        }
+
+        .count-item {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .count-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .count-label {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e1e8ed;
+        }
+
+        .chart-title {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        #logo {
+        width: 70px;
+        height: auto;
+        margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .camera-section,
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+                  
+            #logo {
+                width: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px;">
+                <img id="logo" src="http://15.206.163.148:30119/AG_Logo.png" alt="Logo" />
+                <h1>Arctic-Geese Counting Dashboard</h1>
+            </div>
+            <p>Real-time monitoring of bag and box production</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalBatches">0</div>
+                <div class="stat-label">📊 Total Batches</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalBagsIn">0</div>
+                <div class="stat-label">📥 Total Bags IN</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalBagsOut">0</div>
+                <div class="stat-label">📤 Total Bags OUT</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalBoxesIn">0</div>
+                <div class="stat-label">📥 Total Boxes IN</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalBoxesOut">0</div>
+                <div class="stat-label">📤 Total Boxes OUT</div>
+            </div>
+        </div>
+
+        <div class="camera-section">
+            <div class="camera-card">
+                <div class="camera-title">📷 Camera 1</div>
+                <div id="camera1Batches"></div>
+            </div>
+            <div class="camera-card">
+                <div class="camera-title">📷 Camera 2</div>
+                <div id="camera2Batches"></div>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-card">
+                <div class="chart-title">📈 Production Timeline</div>
+                <canvas id="timelineChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">🔢 Items per Batch</div>
+                <canvas id="batchChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var batchData = {
+            "batch_counts": {
+                    "stream0": {
+                    "batches": [],
+                    "total_in": { "bag": 0, "box": 0 },
+                    "total_out": { "bag": 0, "box": 0 }
+                },
+                "stream1_right": {
+                    "batches": [],
+                    "total_in": { "bag": 0, "box": 0 },
+                    "total_out": { "bag": 0, "box": 0 }
+                },
+                "stream1_left": {
+                    "batches": [],
+                    "total_in": { "bag": 0, "box": 0 },
+                    "total_out": { "bag": 0, "box": 0 }
+                }
+            }
+        };
+
+        const socket = io();
+
+        const videoElement = document.getElementById('videoFrame');
+
+        socket.on('connect', () => {
+            console.log("📡 Socket connected, subscribing...");
+            socket.emit('subscribe', 'I/Agrawal_Log');
+        });
+
+        socket.on('mqttMessage', function (data) {
+        try {
+            const parsed = JSON.parse(data.message);
+            batchData = parsed;
+            initDashboard()
+        } catch (e) {
+            console.log(e)
+        }
+        });
+
+        // Calculate totals
+        function calculateTotals() {
+            const stream0 = batchData.batch_counts.stream0;
+            const stream1Right = batchData.batch_counts.stream1_right;
+            const stream1Left = batchData.batch_counts.stream1_left;
+
+            const totalBatches = stream0.batches.length;
+            
+            const totalBagsIn = stream0.total_in.bag + stream1Right.total_in.bag + stream1Left.total_in.bag;
+            const totalBagsOut = stream0.total_out.bag + stream1Right.total_out.bag + stream1Left.total_out.bag;
+            const totalBoxesIn = stream0.total_in.box + stream1Right.total_in.box + stream1Left.total_in.box;
+            const totalBoxesOut = stream0.total_out.box + stream1Right.total_out.box + stream1Left.total_out.box;
+
+            return { 
+                totalBatches, 
+                totalBagsIn, 
+                totalBagsOut, 
+                totalBoxesIn, 
+                totalBoxesOut
+            };
+        }
+
+        // Update summary stats
+        function updateStats() {
+            const { 
+                totalBatches, 
+                totalBagsIn, 
+                totalBagsOut, 
+                totalBoxesIn, 
+                totalBoxesOut
+            } = calculateTotals();
+            
+            document.getElementById('totalBagsIn').textContent = totalBagsIn;
+            document.getElementById('totalBagsOut').textContent = totalBagsOut;
+            document.getElementById('totalBoxesIn').textContent = totalBoxesIn;
+            document.getElementById('totalBoxesOut').textContent = totalBoxesOut;
+            document.getElementById('totalBatches').textContent = totalBatches;
+        }
+
+        // Create batch item HTML
+        function createBatchItem(batch) {
+            const startTime = new Date(batch.start_time).toLocaleTimeString();
+            const endTime = new Date(batch.end_time).toLocaleTimeString();
+            
+            return `
+                <div class="batch-item">
+                    <div class="batch-info">
+                        <div class="batch-id">Batch ${batch.id}</div>
+                        <div class="batch-time">${startTime} - ${endTime}</div>
+                    </div>
+                    <div class="batch-counts">
+                        <div class="count-item">
+                            <div class="count-value">${batch.in.bag}</div>
+                            <div class="count-label">Bags IN</div>
+                        </div>
+                        <div class="count-item">
+                            <div class="count-value">${batch.out.bag}</div>
+                            <div class="count-label">Bags OUT</div>
+                        </div>
+                        <div class="count-item">
+                            <div class="count-value">${batch.in.box}</div>
+                            <div class="count-label">Boxes IN</div>
+                        </div>
+                        <div class="count-item">
+                            <div class="count-value">${batch.out.box}</div>
+                            <div class="count-label">Boxes OUT</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Populate camera sections
+        function populateCameraSections() {
+            const camera1Container = document.getElementById('camera1Batches');
+            const camera2Container = document.getElementById('camera2Batches');
+
+            // Camera 1 (Stream 0)
+            const stream0Batches = batchData.batch_counts.stream0.batches;
+            camera1Container.innerHTML = stream0Batches.map(createBatchItem).join('');
+
+            // Camera 2 (Stream 1 - combine right and left)
+            const stream1RightBatches = batchData.batch_counts.stream1_right.batches;
+            const stream1LeftBatches = batchData.batch_counts.stream1_left.batches;
+            const allStream1Batches = [...stream1RightBatches, ...stream1LeftBatches];
+            
+            if (allStream1Batches.length > 0) {
+                camera2Container.innerHTML = allStream1Batches.map(createBatchItem).join('');
+            } else {
+                camera2Container.innerHTML = '<div class="no-data">No batches recorded</div>';
+            }
+        }
+
+        let timelineChart = null;
+        let batchChart = null;
+
+        // Create timeline chart
+        function createTimelineChart() {
+            const ctx = document.getElementById('timelineChart').getContext('2d');
+            if (timelineChart) {
+                timelineChart.destroy();
+            }
+            
+            const allBatches = [
+                ...batchData.batch_counts.stream0.batches.map(b => ({...b, camera: 'Camera 1'})),
+                ...batchData.batch_counts.stream1_right.batches.map(b => ({...b, camera: 'Camera 2'}))
+            ].sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+
+            timelineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: allBatches.map(b => new Date(b.start_time).toLocaleTimeString()),
+                    datasets: [
+                        {
+                            label: 'Bags IN',
+                            data: allBatches.map(b => b.in.bag),
+                            borderColor: '#ff9999',
+                            backgroundColor: 'rgba(255, 153, 153, 0.1)',
+                            tension: 0.4,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: 'Bags OUT',
+                            data: allBatches.map(b => b.out.bag),
+                            borderColor: '#ff6b6b',
+                            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Boxes IN',
+                            data: allBatches.map(b => b.in.box),
+                            borderColor: '#87ceeb',
+                            backgroundColor: 'rgba(135, 206, 235, 0.1)',
+                            tension: 0.4,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: 'Boxes OUT',
+                            data: allBatches.map(b => b.out.box),
+                            borderColor: '#48cae4',
+                            backgroundColor: 'rgba(72, 202, 228, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Item Count'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Batch Time'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create batch comparison chart
+        function createBatchChart() {
+            const ctx = document.getElementById('batchChart').getContext('2d');
+
+            if (batchChart) {
+                batchChart.destroy();
+            }
+            
+            const stream0Batches = batchData.batch_counts.stream0.batches;
+            const stream1Batches = batchData.batch_counts.stream1_right.batches;
+
+            batchChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Batch 1', 'Batch 2', 'Batch 3', 'Batch 4'],
+                    datasets: [
+                        {
+                            label: 'Camera 1 - Bags IN',
+                            data: stream0Batches.map(b => b.in.bag),
+                            backgroundColor: '#ffcccb',
+                            borderColor: '#ff6b6b',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Camera 1 - Bags OUT',
+                            data: stream0Batches.map(b => b.out.bag),
+                            backgroundColor: '#ff6b6b'
+                        },
+                        {
+                            label: 'Camera 1 - Boxes IN',
+                            data: stream0Batches.map(b => b.in.box),
+                            backgroundColor: '#ffe4b3',
+                            borderColor: '#feca57',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Camera 1 - Boxes OUT',
+                            data: stream0Batches.map(b => b.out.box),
+                            backgroundColor: '#feca57'
+                        },
+                        {
+                            label: 'Camera 2 - Bags IN',
+                            data: stream1Batches.map(b => b.in.bag),
+                            backgroundColor: '#b3e0ff',
+                            borderColor: '#48cae4',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Camera 2 - Bags OUT',
+                            data: stream1Batches.map(b => b.out.bag),
+                            backgroundColor: '#48cae4'
+                        },
+                        {
+                            label: 'Camera 2 - Boxes IN',
+                            data: stream1Batches.map(b => b.in.box),
+                            backgroundColor: '#b3ffcc',
+                            borderColor: '#06ffa5',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Camera 2 - Boxes OUT',
+                            data: stream1Batches.map(b => b.out.box),
+                            backgroundColor: '#06ffa5'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Item Count'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Batch Number'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize dashboard
+        function initDashboard() {
+            updateStats();
+            populateCameraSections();
+            createTimelineChart();
+            createBatchChart();
+        }
+
+        // Load dashboard when page loads
+        window.addEventListener('load', initDashboard);
+    </script>
+</body>
+</html>
