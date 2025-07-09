@@ -79,14 +79,6 @@
             background: linear-gradient(135deg, #06ffa5, #00d4aa);
         }
 
-        .stat-card:nth-child(4) {
-            background: linear-gradient(135deg, #a8edea, #e7014c);
-        }
-
-        .stat-card:nth-child(5) {
-            background: linear-gradient(135deg, #ff9a9e, #ca03f8);
-        }
-
         .stat-value {
             font-size: 2.5em;
             font-weight: bold;
@@ -232,7 +224,7 @@
                 <img id="logo" src="http://15.206.163.148:30119/AG_Logo.png" alt="Logo" />
                 <h1>Arctic-Geese Counting Dashboard</h1>
             </div>
-            <p>Real-time monitoring of bag and box production</p>
+            <p>Real-time monitoring of item production</p>
         </div>
 
         <div class="stats-grid">
@@ -241,20 +233,12 @@
                 <div class="stat-label">📊 Total Batches</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="totalBagsIn">0</div>
-                <div class="stat-label">📥 Total Bags IN</div>
+                <div class="stat-value" id="totalItemsIn">0</div>
+                <div class="stat-label">📥 Total Items IN</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="totalBagsOut">0</div>
-                <div class="stat-label">📤 Total Bags OUT</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="totalBoxesIn">0</div>
-                <div class="stat-label">📥 Total Boxes IN</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="totalBoxesOut">0</div>
-                <div class="stat-label">📤 Total Boxes OUT</div>
+                <div class="stat-value" id="totalItemsOut">0</div>
+                <div class="stat-label">📤 Total Items OUT</div>
             </div>
         </div>
 
@@ -329,17 +313,21 @@
 
             const totalBatches = stream0.batches.length;
             
-            const totalBagsIn = stream0.total_in.bag + stream1Right.total_in.bag + stream1Left.total_in.bag;
-            const totalBagsOut = stream0.total_out.bag + stream1Right.total_out.bag + stream1Left.total_out.bag;
-            const totalBoxesIn = stream0.total_in.box + stream1Right.total_in.box + stream1Left.total_in.box;
-            const totalBoxesOut = stream0.total_out.box + stream1Right.total_out.box + stream1Left.total_out.box;
+            // Sum bags and boxes as items
+            const totalItemsIn = 
+                (stream0.total_in.bag + stream0.total_in.box) + 
+                (stream1Right.total_in.bag + stream1Right.total_in.box) + 
+                (stream1Left.total_in.bag + stream1Left.total_in.box);
+            
+            const totalItemsOut = 
+                (stream0.total_out.bag + stream0.total_out.box) + 
+                (stream1Right.total_out.bag + stream1Right.total_out.box) + 
+                (stream1Left.total_out.bag + stream1Left.total_out.box);
 
             return { 
                 totalBatches, 
-                totalBagsIn, 
-                totalBagsOut, 
-                totalBoxesIn, 
-                totalBoxesOut
+                totalItemsIn, 
+                totalItemsOut
             };
         }
 
@@ -347,16 +335,12 @@
         function updateStats() {
             const { 
                 totalBatches, 
-                totalBagsIn, 
-                totalBagsOut, 
-                totalBoxesIn, 
-                totalBoxesOut
+                totalItemsIn, 
+                totalItemsOut
             } = calculateTotals();
             
-            document.getElementById('totalBagsIn').textContent = totalBagsIn;
-            document.getElementById('totalBagsOut').textContent = totalBagsOut;
-            document.getElementById('totalBoxesIn').textContent = totalBoxesIn;
-            document.getElementById('totalBoxesOut').textContent = totalBoxesOut;
+            document.getElementById('totalItemsIn').textContent = totalItemsIn;
+            document.getElementById('totalItemsOut').textContent = totalItemsOut;
             document.getElementById('totalBatches').textContent = totalBatches;
         }
 
@@ -364,6 +348,10 @@
         function createBatchItem(batch) {
             const startTime = new Date(batch.start_time).toLocaleTimeString();
             const endTime = new Date(batch.end_time).toLocaleTimeString();
+            
+            // Calculate total items (bags + boxes)
+            const totalItemsIn = batch.in.bag + batch.in.box;
+            const totalItemsOut = batch.out.bag + batch.out.box;
             
             return `
                 <div class="batch-item">
@@ -373,20 +361,12 @@
                     </div>
                     <div class="batch-counts">
                         <div class="count-item">
-                            <div class="count-value">${batch.in.bag}</div>
-                            <div class="count-label">Bags IN</div>
+                            <div class="count-value">${totalItemsIn}</div>
+                            <div class="count-label">Items IN</div>
                         </div>
                         <div class="count-item">
-                            <div class="count-value">${batch.out.bag}</div>
-                            <div class="count-label">Bags OUT</div>
-                        </div>
-                        <div class="count-item">
-                            <div class="count-value">${batch.in.box}</div>
-                            <div class="count-label">Boxes IN</div>
-                        </div>
-                        <div class="count-item">
-                            <div class="count-value">${batch.out.box}</div>
-                            <div class="count-label">Boxes OUT</div>
+                            <div class="count-value">${totalItemsOut}</div>
+                            <div class="count-label">Items OUT</div>
                         </div>
                     </div>
                 </div>
@@ -435,33 +415,18 @@
                     labels: allBatches.map(b => new Date(b.start_time).toLocaleTimeString()),
                     datasets: [
                         {
-                            label: 'Bags IN',
-                            data: allBatches.map(b => b.in.bag),
-                            borderColor: '#ff9999',
-                            backgroundColor: 'rgba(255, 153, 153, 0.1)',
-                            tension: 0.4,
-                            borderDash: [5, 5]
-                        },
-                        {
-                            label: 'Bags OUT',
-                            data: allBatches.map(b => b.out.bag),
-                            borderColor: '#ff6b6b',
-                            backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                            tension: 0.4
-                        },
-                        {
-                            label: 'Boxes IN',
-                            data: allBatches.map(b => b.in.box),
-                            borderColor: '#87ceeb',
-                            backgroundColor: 'rgba(135, 206, 235, 0.1)',
-                            tension: 0.4,
-                            borderDash: [5, 5]
-                        },
-                        {
-                            label: 'Boxes OUT',
-                            data: allBatches.map(b => b.out.box),
+                            label: 'Items IN',
+                            data: allBatches.map(b => b.in.bag + b.in.box),
                             borderColor: '#48cae4',
                             backgroundColor: 'rgba(72, 202, 228, 0.1)',
+                            tension: 0.4,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: 'Items OUT',
+                            data: allBatches.map(b => b.out.bag + b.out.box),
+                            borderColor: '#06ffa5',
+                            backgroundColor: 'rgba(6, 255, 165, 0.1)',
                             tension: 0.4
                         }
                     ]
@@ -510,51 +475,27 @@
                     labels: ['Batch 1', 'Batch 2', 'Batch 3', 'Batch 4'],
                     datasets: [
                         {
-                            label: 'Camera 1 - Bags IN',
-                            data: stream0Batches.map(b => b.in.bag),
-                            backgroundColor: '#ffcccb',
-                            borderColor: '#ff6b6b',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Camera 1 - Bags OUT',
-                            data: stream0Batches.map(b => b.out.bag),
-                            backgroundColor: '#ff6b6b'
-                        },
-                        {
-                            label: 'Camera 1 - Boxes IN',
-                            data: stream0Batches.map(b => b.in.box),
-                            backgroundColor: '#ffe4b3',
-                            borderColor: '#feca57',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Camera 1 - Boxes OUT',
-                            data: stream0Batches.map(b => b.out.box),
-                            backgroundColor: '#feca57'
-                        },
-                        {
-                            label: 'Camera 2 - Bags IN',
-                            data: stream1Batches.map(b => b.in.bag),
+                            label: 'Camera 1 - Items IN',
+                            data: stream0Batches.map(b => b.in.bag + b.in.box),
                             backgroundColor: '#b3e0ff',
                             borderColor: '#48cae4',
                             borderWidth: 1
                         },
                         {
-                            label: 'Camera 2 - Bags OUT',
-                            data: stream1Batches.map(b => b.out.bag),
+                            label: 'Camera 1 - Items OUT',
+                            data: stream0Batches.map(b => b.out.bag + b.out.box),
                             backgroundColor: '#48cae4'
                         },
                         {
-                            label: 'Camera 2 - Boxes IN',
-                            data: stream1Batches.map(b => b.in.box),
+                            label: 'Camera 2 - Items IN',
+                            data: stream1Batches.map(b => b.in.bag + b.in.box),
                             backgroundColor: '#b3ffcc',
                             borderColor: '#06ffa5',
                             borderWidth: 1
                         },
                         {
-                            label: 'Camera 2 - Boxes OUT',
-                            data: stream1Batches.map(b => b.out.box),
+                            label: 'Camera 2 - Items OUT',
+                            data: stream1Batches.map(b => b.out.bag + b.out.box),
                             backgroundColor: '#06ffa5'
                         }
                     ]
