@@ -21,7 +21,7 @@
         }
 
         .dashboard {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -91,9 +91,6 @@
         }
 
         .camera-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
             margin-bottom: 40px;
         }
 
@@ -196,13 +193,12 @@
         }
 
         #logo {
-        width: 70px;
-        height: auto;
-        margin-bottom: 10px;
+            width: 70px;
+            height: auto;
+            margin-bottom: 10px;
         }
 
         @media (max-width: 768px) {
-            .camera-section,
             .charts-section {
                 grid-template-columns: 1fr;
             }
@@ -224,7 +220,7 @@
                 <img id="logo" src="http://15.206.163.148:30119/AG_Logo.png" alt="Logo" />
                 <h1>Arctic-Geese Counting Dashboard</h1>
             </div>
-            <p>Real-time monitoring of item production</p>
+            <p>Real-time monitoring of item production - Camera 1</p>
         </div>
 
         <div class="stats-grid">
@@ -247,10 +243,6 @@
                 <div class="camera-title">📷 Camera 1</div>
                 <div id="camera1Batches"></div>
             </div>
-            <div class="camera-card">
-                <div class="camera-title">📷 Camera 2</div>
-                <div id="camera2Batches"></div>
-            </div>
         </div>
 
         <div class="charts-section">
@@ -268,7 +260,7 @@
     <script>
         var batchData = {
             "batch_counts": {
-                    "stream0": {
+                "stream0": {
                     "batches": [],
                     "total_in": { "bag": 0, "box": 0 },
                     "total_out": { "bag": 0, "box": 0 }
@@ -288,41 +280,30 @@
 
         const socket = io();
 
-        const videoElement = document.getElementById('videoFrame');
-
         socket.on('connect', () => {
             console.log("📡 Socket connected, subscribing...");
             socket.emit('subscribe', 'I/Agrawal_Log');
         });
 
         socket.on('mqttMessage', function (data) {
-        try {
-            const parsed = JSON.parse(data.message);
-            batchData = parsed;
-            initDashboard()
-        } catch (e) {
-            console.log(e)
-        }
+            try {
+                const parsed = JSON.parse(data.message);
+                batchData = parsed;
+                initDashboard()
+            } catch (e) {
+                console.log(e)
+            }
         });
 
-        // Calculate totals
+        // Calculate totals - only for Camera 1 (stream0)
         function calculateTotals() {
             const stream0 = batchData.batch_counts.stream0;
-            const stream1Right = batchData.batch_counts.stream1_right;
-            const stream1Left = batchData.batch_counts.stream1_left;
 
             const totalBatches = stream0.batches.length;
             
-            // Sum bags and boxes as items
-            const totalItemsIn = 
-                (stream0.total_in.bag + stream0.total_in.box) + 
-                (stream1Right.total_in.bag + stream1Right.total_in.box) + 
-                (stream1Left.total_in.bag + stream1Left.total_in.box);
-            
-            const totalItemsOut = 
-                (stream0.total_out.bag + stream0.total_out.box) + 
-                (stream1Right.total_out.bag + stream1Right.total_out.box) + 
-                (stream1Left.total_out.bag + stream1Left.total_out.box);
+            // Sum bags and boxes as items - only from stream0
+            const totalItemsIn = stream0.total_in.bag + stream0.total_in.box;
+            const totalItemsOut = stream0.total_out.bag + stream0.total_out.box;
 
             return { 
                 totalBatches, 
@@ -373,50 +354,39 @@
             `;
         }
 
-        // Populate camera sections
+        // Populate camera section - only Camera 1
         function populateCameraSections() {
             const camera1Container = document.getElementById('camera1Batches');
-            const camera2Container = document.getElementById('camera2Batches');
 
             // Camera 1 (Stream 0)
             const stream0Batches = batchData.batch_counts.stream0.batches;
-            camera1Container.innerHTML = stream0Batches.map(createBatchItem).join('');
-
-            // Camera 2 (Stream 1 - combine right and left)
-            const stream1RightBatches = batchData.batch_counts.stream1_right.batches;
-            const stream1LeftBatches = batchData.batch_counts.stream1_left.batches;
-            const allStream1Batches = [...stream1RightBatches, ...stream1LeftBatches];
-            
-            if (allStream1Batches.length > 0) {
-                camera2Container.innerHTML = allStream1Batches.map(createBatchItem).join('');
+            if (stream0Batches.length > 0) {
+                camera1Container.innerHTML = stream0Batches.map(createBatchItem).join('');
             } else {
-                camera2Container.innerHTML = '<div class="no-data">No batches recorded</div>';
+                camera1Container.innerHTML = '<div class="no-data">No batches recorded</div>';
             }
         }
 
         let timelineChart = null;
         let batchChart = null;
 
-        // Create timeline chart
+        // Create timeline chart - only Camera 1 data
         function createTimelineChart() {
             const ctx = document.getElementById('timelineChart').getContext('2d');
             if (timelineChart) {
                 timelineChart.destroy();
             }
             
-            const allBatches = [
-                ...batchData.batch_counts.stream0.batches.map(b => ({...b, camera: 'Camera 1'})),
-                ...batchData.batch_counts.stream1_right.batches.map(b => ({...b, camera: 'Camera 2'}))
-            ].sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+            const stream0Batches = batchData.batch_counts.stream0.batches;
 
             timelineChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: allBatches.map(b => new Date(b.start_time).toLocaleTimeString()),
+                    labels: stream0Batches.map(b => new Date(b.start_time).toLocaleTimeString()),
                     datasets: [
                         {
                             label: 'Items IN',
-                            data: allBatches.map(b => b.in.bag + b.in.box),
+                            data: stream0Batches.map(b => b.in.bag + b.in.box),
                             borderColor: '#48cae4',
                             backgroundColor: 'rgba(72, 202, 228, 0.1)',
                             tension: 0.4,
@@ -424,7 +394,7 @@
                         },
                         {
                             label: 'Items OUT',
-                            data: allBatches.map(b => b.out.bag + b.out.box),
+                            data: stream0Batches.map(b => b.out.bag + b.out.box),
                             borderColor: '#06ffa5',
                             backgroundColor: 'rgba(6, 255, 165, 0.1)',
                             tension: 0.4
@@ -458,7 +428,7 @@
             });
         }
 
-        // Create batch comparison chart
+        // Create batch comparison chart - only Camera 1 data
         function createBatchChart() {
             const ctx = document.getElementById('batchChart').getContext('2d');
 
@@ -467,36 +437,23 @@
             }
             
             const stream0Batches = batchData.batch_counts.stream0.batches;
-            const stream1Batches = batchData.batch_counts.stream1_right.batches;
 
             batchChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Batch 1', 'Batch 2', 'Batch 3', 'Batch 4'],
+                    labels: stream0Batches.map((_, index) => `Batch ${index + 1}`),
                     datasets: [
                         {
-                            label: 'Camera 1 - Items IN',
+                            label: 'Items IN',
                             data: stream0Batches.map(b => b.in.bag + b.in.box),
                             backgroundColor: '#b3e0ff',
                             borderColor: '#48cae4',
                             borderWidth: 1
                         },
                         {
-                            label: 'Camera 1 - Items OUT',
+                            label: 'Items OUT',
                             data: stream0Batches.map(b => b.out.bag + b.out.box),
                             backgroundColor: '#48cae4'
-                        },
-                        {
-                            label: 'Camera 2 - Items IN',
-                            data: stream1Batches.map(b => b.in.bag + b.in.box),
-                            backgroundColor: '#b3ffcc',
-                            borderColor: '#06ffa5',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Camera 2 - Items OUT',
-                            data: stream1Batches.map(b => b.out.bag + b.out.box),
-                            backgroundColor: '#06ffa5'
                         }
                     ]
                 },
