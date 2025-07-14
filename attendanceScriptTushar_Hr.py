@@ -41,7 +41,7 @@ def login_api_for_start_attndance():
 
         # Click the button using class selector
         page.wait_for_timeout(5000)
-        page.wait_for_load_state("networkidle")
+        # page.wait_for_load_state("networkidle")
         page.click("text=Sign In")
 
         page.wait_for_timeout(5000)
@@ -68,7 +68,7 @@ def login_api_for_end_attndance():
 
         # Click the button using class selector
         page.wait_for_timeout(5000)
-        page.wait_for_load_state("networkidle")
+        # page.wait_for_load_state("networkidle")
         page.click("text=Sign Out")
 
         page.wait_for_timeout(5000)
