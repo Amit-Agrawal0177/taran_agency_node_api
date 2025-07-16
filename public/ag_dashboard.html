@@ -109,7 +109,7 @@
         }
 
         .stat-card:nth-child(3) {
-            background: linear-gradient(135deg, #06ffa5, #d40000);
+            background: linear-gradient(135deg, #d200d4, #d40000)
         }
 
         .stat-value {
@@ -301,6 +301,8 @@
     </div>
 
     <script>
+        var dateForMqtt = "";
+
         var batchData = {
             "batch_counts": {
                 "stream0": {
@@ -330,6 +332,7 @@
             datePicker.value = today.toISOString().split('T')[0];
             
             // Log the initial date
+            dateForMqtt = datePicker.value;
             console.log('Initial selected date:', datePicker.value);
             socket.emit('publish', {
                 topic: 'R/Agrawal_log',
@@ -340,6 +343,7 @@
             datePicker.addEventListener('change', function() {
                 const selectedDate = this.value;
                 console.log('Selected date:', selectedDate);
+                dateForMqtt = selectedDate;
                 socket.emit('publish', {
                     topic: 'R/Agrawal_log',
                     message: JSON.stringify({ Date: selectedDate })
@@ -401,6 +405,14 @@
                 totalItemsOut
             };
         }
+
+        setInterval(() => {
+            socket.emit('publish', {
+                topic: 'R/Agrawal_log',
+                message: JSON.stringify({ Date: dateForMqtt })
+            });
+            console.log("This runs every 3 seconds for date ", dateForMqtt);
+        }, 3000);
 
         // Update summary stats
         function updateStats() {
