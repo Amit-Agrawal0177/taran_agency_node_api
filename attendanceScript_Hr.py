@@ -77,7 +77,7 @@ def login_api_for_end_attndance():
 
 
 schedule.every().day.at("10:00").do(login_api_for_start_attndance)
-schedule.every().day.at("18:00").do(login_api_for_end_attndance)
+schedule.every().day.at("19:30").do(login_api_for_end_attndance)
 
 while True:
     schedule.run_pending()
