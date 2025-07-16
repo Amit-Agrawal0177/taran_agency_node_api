@@ -302,6 +302,16 @@
 
     <script>
         var dateForMqtt = "";
+        function getRandomString(length = 10) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+        var secretKey = getRandomString();
+        console.log("secretKey ", secretKey)
 
         var batchData = {
             "batch_counts": {
@@ -336,7 +346,7 @@
             console.log('Initial selected date:', datePicker.value);
             socket.emit('publish', {
                 topic: 'R/Agrawal_log',
-                message: JSON.stringify({ Date: datePicker.value })
+                message: JSON.stringify({ Date: datePicker.value, secretKey })
             });
             
             // Add event listener for date changes
@@ -346,7 +356,7 @@
                 dateForMqtt = selectedDate;
                 socket.emit('publish', {
                     topic: 'R/Agrawal_log',
-                    message: JSON.stringify({ Date: selectedDate })
+                    message: JSON.stringify({ Date: selectedDate, secretKey })
                 });
 
                 batchData = {
@@ -382,8 +392,12 @@
         socket.on('mqttMessage', function (data) {
             try {
                 const parsed = JSON.parse(data.message);
-                batchData = parsed;
-                initDashboard()
+                console.log(parsed)
+                if(parsed.secretKey == secretKey)
+                {
+                    batchData = parsed;
+                    initDashboard()
+                }
             } catch (e) {
                 console.log(e)
             }
@@ -409,7 +423,7 @@
         setInterval(() => {
             socket.emit('publish', {
                 topic: 'R/Agrawal_log',
-                message: JSON.stringify({ Date: dateForMqtt })
+                message: JSON.stringify({ Date: dateForMqtt, secretKey })
             });
             console.log("This runs every 3 seconds for date ", dateForMqtt);
         }, 3000);
