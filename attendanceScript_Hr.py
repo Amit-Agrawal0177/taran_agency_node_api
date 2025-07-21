@@ -23,55 +23,65 @@ def is_restricted_day():
     return False
 
 def login_api_for_start_attndance():
-    if is_restricted_day() == True:
-        return
+    try:
 
-    number = random.randint(300, 1800)
-    time.sleep(number)
+        if is_restricted_day() == True:
+            return
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
-        page.goto("https://flovation.greythr.com/v3/portal/ess/home")
-        
-        # Fill login form
-        page.fill("#username", "FT002")
-        page.fill("#password", "Megha123@")
-        page.press("#password", "Enter")
+        number = random.randint(300, 1800)
+        time.sleep(number)
 
-        # Click the button using class selector
-        page.wait_for_timeout(5000)
-        # page.wait_for_load_state("networkidle")
-        page.click("text=Sign In")
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto("https://flovation.greythr.com/v3/portal/ess/home")
+            
+            # Fill login form
+            page.fill("#username", "FT002")
+            page.fill("#password", "Megha123@")
+            page.press("#password", "Enter")
 
-        page.wait_for_timeout(5000)
+            # Click the button using class selector
+            page.wait_for_timeout(10000)
+            # page.wait_for_load_state("networkidle")
+            page.click("text=Sign In")
+
+            page.wait_for_timeout(5000)
+            browser.close()
+    except Exception as e:
+        print(f"Error triggering API: {e}")
         browser.close()
+
     
     
 
 def login_api_for_end_attndance():
-    if is_restricted_day() == True:
-        return
+    try:
+        if is_restricted_day() == True:
+            return
 
-    number = random.randint(300, 1800)
-    time.sleep(number)
+        number = random.randint(300, 1800)
+        time.sleep(number)
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
-        page.goto("https://flovation.greythr.com/v3/portal/ess/home")
-        
-        # Fill login form
-        page.fill("#username", "FT002")
-        page.fill("#password", "Megha123@")
-        page.press("#password", "Enter")
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto("https://flovation.greythr.com/v3/portal/ess/home")
+            
+            # Fill login form
+            page.fill("#username", "FT002")
+            page.fill("#password", "Megha123@")
+            page.press("#password", "Enter")
 
-        # Click the button using class selector
-        page.wait_for_timeout(5000)
-        # page.wait_for_load_state("networkidle")
-        page.click("text=Sign Out")
+            # Click the button using class selector
+            page.wait_for_timeout(10000)
+            # page.wait_for_load_state("networkidle")
+            page.click("text=Sign Out")
 
-        page.wait_for_timeout(5000)
+            page.wait_for_timeout(5000)
+            browser.close()
+    except Exception as e:
+        print(f"Error triggering API: {e}")
         browser.close()
 
 
