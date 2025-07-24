@@ -4,6 +4,8 @@ import schedule
 import random
 from playwright.sync_api import sync_playwright
 
+print("Megha Attndc Script Started")
+
 MAX_RETRIES = 3
 
 def is_restricted_day():
@@ -49,15 +51,13 @@ def login_api_for_start_attndance():
                 page.click("text=Sign In")
 
                 page.wait_for_timeout(5000)
+                browser.close()
             return
 
         except Exception as e:
             print(f"[ERROR] Attempt {retries+1}: {e}")
             retries += 1
             time.sleep(5)
-        finally:
-            if browser:
-                browser.close()
 
     print("[FAILURE] All retries exhausted. Login failed.")
 
@@ -87,15 +87,13 @@ def login_api_for_end_attndance():
                 page.click("text=Sign Out")
 
                 page.wait_for_timeout(5000)
+                browser.close()
             return
 
         except Exception as e:
             print(f"[ERROR] Attempt {retries+1}: {e}")
             retries += 1
             time.sleep(5)
-        finally:
-            if browser:
-                browser.close()
 
     print("[FAILURE] All retries exhausted. sign Out failed.")
 

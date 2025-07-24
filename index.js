@@ -85,14 +85,12 @@ require("./helpers/vault").getenv().then(() => {
     });
     
     io.on('connection', (socket) => {
-        console.log('WebSocket client connected');
+        // console.log('WebSocket client connected');
     
         socket.on('subscribe', (topic) => {
             mqttClient.subscribe(topic, (err) => {
                 if (err) {
                     console.error('MQTT subscription error:', err);
-                } else {
-                    console.log(`Subscribed to MQTT topic: ${topic}`);
                 }
             });
     
@@ -116,7 +114,7 @@ require("./helpers/vault").getenv().then(() => {
         });
 
         socket.on('disconnect', () => {
-            console.log('WebSocket client disconnected');
+            // console.log('WebSocket client disconnected');
         });
 
         socket.on('publish', (data) => {
@@ -176,6 +174,7 @@ require("./helpers/vault").getenv().then(() => {
     
       attendanceProcess.on('close', (code) => {
         console.log(`child process exited with code ${code}`);
+        console.log("Megha Attndc Script Stopped");
         attendanceScript();
       });
     }
@@ -196,6 +195,7 @@ require("./helpers/vault").getenv().then(() => {
     
       attendanceProcess.on('close', (code) => {
         console.log(`child process exited with code ${code}`);
+        console.log("Tushar Attndc Script Stopped");
         attendanceScriptTushar();
       });
     }
