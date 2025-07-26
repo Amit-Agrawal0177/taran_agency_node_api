@@ -47,7 +47,8 @@ def login_api_for_start_attndance():
                 page.fill("#password", "9930@OEPP")
                 page.press("#password", "Enter")
 
-                page.wait_for_timeout(10000)
+                # page.wait_for_timeout(10000)
+                page.wait_for_selector("text=Sign In", timeout=15000)
                 page.click("text=Sign In")
 
                 page.wait_for_timeout(5000)
@@ -83,7 +84,8 @@ def login_api_for_end_attndance():
                 page.fill("#password", "9930@OEPP")
                 page.press("#password", "Enter")
 
-                page.wait_for_timeout(10000)
+                # page.wait_for_timeout(10000)
+                page.wait_for_selector("text=Sign Out", timeout=15000)
                 page.click("text=Sign Out")
 
                 page.wait_for_timeout(5000)

@@ -80,30 +80,33 @@
     socket.on('connect', () => {
       console.log("📡 Socket connected, subscribing...");
       socket.emit('subscribe', 'R/Shakti/Video');
-      // socket.emit('publish', {
-      //   topic: 'R/Agrawal_papad',
-      //   message: 'Start Streaming'
-      // });
+      socket.emit('publish', {
+        topic: 'I/Shakti/Video',
+        message: 'Start Streaming'
+      });
 
       // Publish every 30 seconds
-      // setInterval(() => {
-      //   socket.emit('publish', {
-      //     topic: 'R/Agrawal_papad',
-      //     message: 'Start Streaming'
-      //   });
-      //   console.log("📤 Published 'Start Streaming' to R/Agrawal_papad");
-      // }, 30000);
+      setInterval(() => {
+        socket.emit('publish', {
+          topic: 'I/Shakti/Video',
+          message: 'Start Streaming'
+        });
+        console.log("📤 Published 'Start Streaming' to I/Shakti/Video");
+      }, 30000);
     });
 
     socket.on('mqttMessage', function (data) {
-      try {
-        const parsed = JSON.parse(data.message);
-        if (parsed.data) {
-          videoElement.src = 'data:image/jpeg;base64,' + parsed.data;
-        }
-      } catch (e) {
-        if (typeof data.message === 'string' && data.message.length > 100) {
-          videoElement.src = 'data:image/jpeg;base64,' + data.message;
+      if(data.topic == "R/Shakti/Video")
+      {
+        try {
+          const parsed = JSON.parse(data.message);
+          if (parsed.data) {
+            videoElement.src = 'data:image/jpeg;base64,' + parsed.data;
+          }
+        } catch (e) {
+          if (typeof data.message === 'string' && data.message.length > 100) {
+            videoElement.src = 'data:image/jpeg;base64,' + data.message;
+          }
         }
       }
     });
