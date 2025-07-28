@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arctic-Geese Counting Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script src="http://15.206.163.148:30119/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -260,7 +260,7 @@
 
         <div class="header">
             <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px;">
-                <img id="logo" src="http://15.206.163.148:30119/AG_Logo.png" alt="Logo" />
+                <img id="logo" src="https://arctic-geese.s3.ap-south-1.amazonaws.com/Agrawal's_420_Papad/AG_Logo_large+(2).png" alt="Logo" />
                 <h1>Arctic-Geese Counting Dashboard</h1>
             </div>
             <p>Real-time monitoring of item production - Camera 1</p>
@@ -382,7 +382,13 @@
             });
         }
 
-        const socket = io();
+        const socket = io('https://www.arctic-geese.com', {
+            path: '/socket.io/',
+            transports: ['websocket', 'polling'],
+            secure: true,
+            timeout: 20000,
+            forceNew: true
+        });
 
         socket.on('connect', () => {
             console.log("📡 Socket connected, subscribing...");
@@ -390,16 +396,19 @@
         });
 
         socket.on('mqttMessage', function (data) {
-            try {
-                const parsed = JSON.parse(data.message);
-                console.log(parsed)
-                if(parsed.secretKey == secretKey)
-                {
-                    batchData = parsed;
-                    initDashboard()
+            if(data.topic == "I/Agrawal_Log")
+            {
+                try {
+                    const parsed = JSON.parse(data.message);
+                    console.log(parsed)
+                    if(parsed.secretKey == secretKey)
+                    {
+                        batchData = parsed;
+                        initDashboard()
+                    }
+                } catch (e) {
+                    console.log(e)
                 }
-            } catch (e) {
-                console.log(e)
             }
         });
 
