@@ -78,7 +78,7 @@
       encoding: 'utf8'
   };
     
-  var mqttClient = mqtt.connect('mqtt://15.206.163.148', options);
+  var mqttClient = mqtt.connect('mqtt://52.66.165.113', options);
     
     mqttClient.on('connect', () => {
         console.log('MQTT client connected');
