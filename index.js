@@ -200,6 +200,6 @@
       });
     }
 
-    //attendanceScript ();
+    attendanceScript ();
     attendanceScriptTushar ();
 // });

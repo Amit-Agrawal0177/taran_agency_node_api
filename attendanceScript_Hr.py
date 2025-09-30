@@ -3,8 +3,27 @@ from datetime import datetime
 import schedule
 import random
 from playwright.sync_api import sync_playwright
+import mysql.connector
 
 print("Megha Attndc Script Started")
+
+conn = mysql.connector.connect(
+    host="oswalcorns.com",       
+    user="oswalcorns",   
+    password="getitd0ne@C",  
+    database="taran_agency_db"   
+)
+
+def checkForAttndance():
+    cursor = conn.cursor()
+    cursor.execute("SELECT a FROM att where id = 1;")
+
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return rows[0][0] == 2
 
 MAX_RETRIES = 3
 
@@ -71,6 +90,9 @@ def login_api_for_end_attndance():
             if is_restricted_day():
                 return
 
+            if checkForAttndance():
+                return
+            
             number = random.randint(0, 300)
             time.sleep(number)
 
