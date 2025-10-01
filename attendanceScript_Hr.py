@@ -7,14 +7,14 @@ import mysql.connector
 
 print("Megha Attndc Script Started")
 
-conn = mysql.connector.connect(
-    host="oswalcorns.com",       
-    user="oswalcorns",   
-    password="getitd0ne@C",  
-    database="taran_agency_db"   
-)
-
 def checkForAttndance():
+    conn = mysql.connector.connect(
+        host="oswalcorns.com",       
+        user="oswalcorns",   
+        password="getitd0ne@C",  
+        database="taran_agency_db"   
+    )
+
     cursor = conn.cursor()
     cursor.execute("SELECT a FROM att where id = 1;")
 
