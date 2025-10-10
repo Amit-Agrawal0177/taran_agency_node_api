@@ -86,8 +86,8 @@ def login_api_for_start_attndance():
                 logging.info("Attendance already marked — skipping login.")
                 return
             
-            # number = random.randint(300, 1800)
-            # time.sleep(number)
+            number = random.randint(300, 1800)
+            time.sleep(number)
 
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True)
@@ -180,7 +180,7 @@ def login_api_for_end_attndance():
 
 
 # === Schedule tasks ===
-schedule.every().day.at("16:24").do(login_api_for_start_attndance)
+schedule.every().day.at("10:00").do(login_api_for_start_attndance)
 schedule.every().day.at("19:30").do(login_api_for_end_attndance)
 
 logging.info("Scheduling started. Waiting for next trigger...")
