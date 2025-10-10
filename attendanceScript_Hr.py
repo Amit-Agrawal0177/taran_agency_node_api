@@ -92,18 +92,28 @@ def login_api_for_start_attndance():
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True)
                 page = browser.new_page()
+
                 page.goto("https://flovation.greythr.com/v3/portal/ess/home")
 
                 page.fill("#username", "FT002")
                 page.fill("#password", "Megha123@")
-                page.click("button:has-text('Sign In')")
+                page.press("#password", "Enter")
 
                 try:
                     page.wait_for_url("**/portal/ess/home", timeout=60000)
                 except:
-                    page.wait_for_selector("text=Attendance", timeout=60000)
+                    page.wait_for_selector("text=Sign In", timeout=60000)
 
-                logging.info("Login successful.")
+                logging.info("Login successful, dashboard loaded.")
+
+                try:
+                    page.wait_for_selector("text=Sign In", timeout=30000)
+                    page.click("text=Sign In")
+                    logging.info("Attendance 'Sign In' clicked successfully.")
+                except Exception as e:
+                    logging.error(f"Could not click attendance Sign In: {e}")
+
+                page.wait_for_timeout(5000)
                 browser.close()
 
         except Exception as e:
@@ -131,18 +141,28 @@ def login_api_for_end_attndance():
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True)
                 page = browser.new_page()
+
                 page.goto("https://flovation.greythr.com/v3/portal/ess/home")
 
                 page.fill("#username", "FT002")
                 page.fill("#password", "Megha123@")
-                page.click("button:has-text('Sign Out')")
+                page.press("#password", "Enter")
 
                 try:
                     page.wait_for_url("**/portal/ess/home", timeout=60000)
                 except:
-                    page.wait_for_selector("text=Attendance", timeout=60000)
+                    page.wait_for_selector("text=Sign Out", timeout=60000)
 
-                logging.info("Logout successful.")
+                logging.info("Login successful, dashboard loaded.")
+
+                try:
+                    page.wait_for_selector("text=Sign Out", timeout=30000)
+                    page.click("text=Sign Out")
+                    logging.info("Attendance 'Sign Out' clicked successfully.")
+                except Exception as e:
+                    logging.error(f"Could not click attendance Sign Out: {e}")
+
+                page.wait_for_timeout(5000)
                 browser.close()
 
             logging.info("Logout successful.")
