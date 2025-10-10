@@ -96,12 +96,14 @@ def login_api_for_start_attndance():
 
                 page.fill("#username", "FT005")
                 page.fill("#password", "9930@OEPP")
-                page.press("#password", "Enter")
+                page.click("button:has-text('Sign In')")
 
-                page.wait_for_selector("text=Sign In", timeout=30000)
-                page.click("text=Sign In")
+                try:
+                    page.wait_for_url("**/portal/ess/home", timeout=60000)
+                except:
+                    page.wait_for_selector("text=Attendance", timeout=60000)
 
-                page.wait_for_timeout(5000)
+                logging.info("Login successful.")
                 browser.close()
 
             logging.info("Login successful.")
@@ -136,12 +138,14 @@ def login_api_for_end_attndance():
 
                 page.fill("#username", "FT005")
                 page.fill("#password", "9930@OEPP")
-                page.press("#password", "Enter")
+                page.click("button:has-text('Sign Out')")
 
-                page.wait_for_selector("text=Sign Out", timeout=30000)
-                page.click("text=Sign Out")
+                try:
+                    page.wait_for_url("**/portal/ess/home", timeout=60000)
+                except:
+                    page.wait_for_selector("text=Attendance", timeout=60000)
 
-                page.wait_for_timeout(5000)
+                logging.info("Logout successful.")
                 browser.close()
 
             logging.info("Logout successful.")
