@@ -110,6 +110,7 @@ def checkForAttndance():
 
 
 def is_restricted_day():
+    return False
     today = datetime.now()
     weekday = today.weekday()
 
