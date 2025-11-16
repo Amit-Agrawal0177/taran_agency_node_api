@@ -110,13 +110,14 @@ def checkForAttndance():
 
 
 def is_restricted_day():
-    return False
     today = datetime.now()
     weekday = today.weekday()
 
     # Sunday off
     if weekday == 6:
         return True
+    
+    return False
 
     # 2nd Saturday off
     if weekday == 5:
